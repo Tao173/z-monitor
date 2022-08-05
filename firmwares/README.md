@@ -1,1 +1,0 @@
-Downalod from github [releases](https://github.com/koptserg/motion_bme280spi_bh1750_epd29/releases)
