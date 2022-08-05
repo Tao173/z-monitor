@@ -360,9 +360,9 @@ void zclApp_Init(byte task_id) {
 void zclApp_ProcessZDOMsgs(uint8 count, zdoIncomingMsg_t *InMsg){
   
   switch (InMsg->clusterID){
-#ifdef BIND_REQ    
+#ifdef BIND_REQ     
     case Mgmt_Bind_rsp:
-      LREP("InMsg->clusterID=0x%X\r\n", InMsg->clusterID);
+      LREP("InMsg->clusterID=0x%X InMsg->asdu=%X\r\n", InMsg->clusterID, InMsg->asdu);
       {
 //        HalLedSet(HAL_LED_1, HAL_LED_MODE_BLINK);
         uint8 bindingListCount = 0;
@@ -392,13 +392,14 @@ void zclApp_ProcessZDOMsgs(uint8 count, zdoIncomingMsg_t *InMsg){
           temp_bindingCount = 0;
           temp_bindingStartIndex = 0;
         }
-
+        
+        osal_mem_free(BindRsp);
       }
       break;
 #endif      
 #ifdef LQI_REQ
     case Mgmt_Lqi_rsp:
-      LREP("InMsg->clusterID=0x%X\r\n", InMsg->clusterID);      
+      LREP("InMsg->clusterID=0x%X InMsg->asdu=%X\r\n", InMsg->clusterID, InMsg->asdu);      
     {
       ZDO_MgmtLqiRsp_t *LqRsp;
       uint8 num;
@@ -410,8 +411,7 @@ void zclApp_ProcessZDOMsgs(uint8 count, zdoIncomingMsg_t *InMsg){
       LqRsp = ZDO_ParseMgmtLqiRsp(InMsg);
 
       num = LqRsp->neighborLqiCount;
-      LREP("neighborLqiCount=%d\r\n",LqRsp->neighborLqiCount);
-      LREP("startIndex=%d\r\n",LqRsp->startIndex);
+      LREP("startIndex=%d neighborLqiCount=%d\r\n", LqRsp->startIndex, LqRsp->neighborLqiCount);
       if (num != 0) {
         for(i= 0; i < num && find == 0; i++)
         {
@@ -429,8 +429,7 @@ void zclApp_ProcessZDOMsgs(uint8 count, zdoIncomingMsg_t *InMsg){
           } else {
             temp_LqiStartIndex[count] = temp_LqiStartIndex[count] + 1;
           }
-          LREP("nwkAddr=0x%X\r\n", LqRsp->list[i].nwkAddr);
-          LREP("lqi=%d\r\n", LqRsp->list[i].lqi);
+          LREP("nwkAddr=0x%X lqi=%d\r\n", LqRsp->list[i].nwkAddr, LqRsp->list[i].lqi);
         }
 
       } else {
@@ -453,7 +452,7 @@ void zclApp_ProcessZDOMsgs(uint8 count, zdoIncomingMsg_t *InMsg){
 #endif
   }
   if (InMsg->asdu) {
-    LREPMaster("osal_mem_free\r\n");
+    LREP("osal_mem_free InMsg->asdu=%X\r\n", InMsg->asdu);
     osal_mem_free(InMsg->asdu);
   }
 }
